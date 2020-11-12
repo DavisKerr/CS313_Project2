@@ -21,6 +21,10 @@ app.use(bodyParser.json());
 
 app.listen(PORT);
 
+app.get("/", (req, res) => {
+  res.end("<h1>Welcome!</h1><br><a href='/home.html'>Go to Postal Calendar Project</a>")
+});
+
 app.post("/calculatePostage", (req, res) => {
   var weight = Number(req.body.weight);
   var type = req.body.type;
