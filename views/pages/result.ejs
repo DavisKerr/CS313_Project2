@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="calc.css">
+  </head>
+  <body>
+    <h1>Results:</h1>
+    <div class="jumbotron d-flex flex-column align-items-center">
+      <% if(error){"ERROR: DATA WAS INVALID"} %>
+      <span><strong>Weight:</strong> <%= weight %><br></span>
+      <span><strong>Type:</strong> <%= type %><br></span>
+      <span><strong>Zone:</strong> <%= zone %><br></span>
+      <span><strong>Total:</strong> $<%= total.toFixed(2) %><br></span>
+    </div>
+  </body>
+</html>
