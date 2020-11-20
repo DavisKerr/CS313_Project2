@@ -19,6 +19,7 @@ var createAccount = require('./Data/account/createAccount');
 
 /* Session utilities */
 var getAuth = require('./Util/Sessions/getAuth');
+var logout = require('./Util/Sessions/logout');
 
 /* Constant Variables */
 const PORT = process.env.PORT || 5000;
@@ -90,7 +91,7 @@ app.get("/familyGameNight/home", (req, res) => {
   {
     res.redirect('/familyGameNight/login');
   }
-  res.end("<h1>Successful login. More content coming soon!</h1>");
+  res.end("<h1>Successful login. More content coming soon!</h1><br><a href='./logout'>Logout</a>");
 });
 
 app.post("/familyGameNight/processRegister", [
@@ -103,6 +104,11 @@ app.post("/familyGameNight/processRegister", [
     var username = req.body.username;
     var password = req.body.password;
     createAccount.createAccount(pool, fname, lname, username, password, res, saltRounds);
+});
+
+app.get("/familyGameNight/logout", (req, res) => {
+  logout.logout(req);
+  res.redirect('/familyGameNight/login');
 });
 
 
