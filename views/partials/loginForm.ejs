@@ -1,0 +1,12 @@
+<div class="authBox">
+  <h3>Log in:</h3>
+  <span id="formErr"></span>
+  <form class="authForm" method="POST" action="processLogin" onsubmit="return validateLogin()">
+    <label for="username">Username:</label>
+    <input type="text" name="username" id="username">
+    <span id="usrnmErr"></span>
+    <label for="password">Password:</label>
+    <input type="password" name="password" id="password">
+    <span id="passwdErr"></span><br>
+    <button type="submit" class="btn btn-success">Login</button>
+  </form>

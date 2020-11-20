@@ -1,26 +1,118 @@
+/* Express and node Modules */
 const express = require('express')
 const path = require('path')
 const URL = require('url');
 const bodyParser = require("body-parser");
-const PORT = process.env.PORT || 5000
+const { body } = require('express-validator');
+const { Pool } = require('pg');
+const session = require('express-session');
+require('dotenv').config();
 
-// express()
-//   .use(express.static(path.join(__dirname, 'public')))
-//   .set('views', path.join(__dirname, 'views'))
-//   .set('view engine', 'ejs')
-//   .get('/', (req, res) => res.render('pages/index'))
-//   .listen(PORT, () => console.log(`Listening on ${ PORT }`))
+/* Prove 09 Modules */
+var calculateRate = require('./prove09/calculateRate');
+const { checkServerIdentity } = require('tls');
+const { sanitizeBody } = require('express-validator');
+
+/* Project Modules */
+var queryAccounts = require('./Data/account/queryAccount');
+var createAccount = require('./Data/account/createAccount');
+
+/* Session utilities */
+var getAuth = require('./Util/Sessions/getAuth');
+var logout = require('./Util/Sessions/logout');
+
+/* Constant Variables */
+const PORT = process.env.PORT || 5000;
+const connectionString = process.env.DATABASE_URL;
+const saltRounds = 10;
+
+const pool = new Pool({connectionString : connectionString});
+if(process.env.IS_LOCAL == 'true')
+{
+  process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
+}
+
 
 var app = express();
+
+
+
+//app.use(express.json());
+
 app.use(express.static(path.join(__dirname, 'public')));
+
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+app.use(session({secret: 'shhhhhh', saveUninitialized : true, resave: true}));
+
 app.listen(PORT);
 
+
+/* Project 2*/ 
+
+app.get("/familyGameNight/login", (req, res) => {
+  if(getAuth.isLoggedIn(req))
+  {
+    res.redirect('/familyGameNight/home');
+  }
+  else
+  {
+    res.render('pages/auth', {login:true, page:'auth', error: (req.query.error != undefined ? req.query.error : '')});
+  }
+});
+
+app.post("/familyGameNight/processLogin",[body('username').trim().escape().blacklist(';&%\\()\{\}!@#\$\^'), body('password').trim().escape().blacklist(';%&\\()\{\}!@#\$\^')] ,(req, res) => {
+  var username = req.body.username;
+  var password = req.body.password;
+  var sess = req.session;
+  queryAccounts.queryAccounts(pool, username, password, res, sess );
+  
+});
+
+app.get("/familyGameNight/register", (req, res) => {
+  if(getAuth.isLoggedIn(req))
+  {
+    res.redirect('/familyGameNight/home');
+  }
+  else
+  {
+    res.render('pages/auth', {login:false, page:'auth', error: (req.query.error != undefined ? req.query.error : '')});
+  }
+  
+});
+
+app.get("/familyGameNight/home", (req, res) => {
+  var sess = req.session;
+  if(!sess.loggedIn)
+  {
+    res.redirect('/familyGameNight/login');
+  }
+  res.end("<h1>Successful login. More content coming soon!</h1><br><a href='./logout'>Logout</a>");
+});
+
+app.post("/familyGameNight/processRegister", [
+  body('fname').trim().escape().blacklist(';&%\\()\{\}!@#\$\^'), 
+  body('lname').trim().escape().blacklist(';%&\\()\{\}!@#\$\^'),
+  body('username').trim().escape().blacklist(';%&\\()\{\}!@#\$\^'),
+  body('password').trim().escape().blacklist(';%&\\()\{\}!@#\$\^')],(req, res) => {
+    var fname = req.body.fname;
+    var lname = req.body.lname;
+    var username = req.body.username;
+    var password = req.body.password;
+    createAccount.createAccount(pool, fname, lname, username, password, res, saltRounds);
+});
+
+app.get("/familyGameNight/logout", (req, res) => {
+  logout.logout(req);
+  res.redirect('/familyGameNight/login');
+});
+
+
+/* Previous proves*/
 app.get("/", (req, res) => {
   res.end("<h1>Welcome!</h1><br><a href='/home.html'>Go to Postal Calendar Project</a>")
 });
@@ -34,7 +126,7 @@ app.post("/calculatePostage", (req, res) => {
     zone = req.body.zone;
   }
 
-  result = calculateRate(weight, type, zone)
+  result = calculateRate.calculateRate(weight, type, zone)
   if(result.error == true)
   {
     res.render('pages/result', result);
@@ -43,127 +135,4 @@ app.post("/calculatePostage", (req, res) => {
   {
     res.render('pages/result', result);
   }
-
 });
-
-function calculateRate(weight, type, zone)
-{
-  var total = 0;
-  switch(type)
-  {
-    case('LS'):
-      total = calcLSTotal(weight);
-      break;
-    case('LM'):
-      total = calcLMTotal(weight);
-      break;
-    case('LE'):
-    total = calculateLETotal(weight);
-      break;
-    case('FCP'):
-    total = calcFCPTotal(weight, zone)
-      break;
-  }
-  if(total != 0)
-  {
-    return {
-      weight: weight,
-      type: (type == 'LS' ? 'Letter (Stamped)':(type == 'LM' ? 'Letter (Metered)':(type == 'LE' ? 'Large Envelopes (Flats)':'First-Class Package Service - Retail'))),
-      total: total,
-      zone: (zone == 0 ? 'n/a' : zone),
-      error: false
-    };
-  }
-  else
-  {
-    return {
-      weight: '',
-      type: '',
-      zone: '',
-      total: '',
-      error: true
-    };
-  }
-  
-}
-
-function calcLSTotal(weight)
-{
-  if(weight <= 1)
-  {
-    return 0.55;
-  }
-  else if(weight <= 2)
-  {
-    return 0.70;
-  }
-  else if(weight <= 3)
-  {
-    return 0.85;
-  }
-  else if(weight <= 3.5)
-  {
-    return 1.00;
-  }
-  else
-  {
-    return 0;
-  }
-}
-
-function calcLMTotal(weight)
-{
-  if(weight <= 1)
-  {
-    return 0.50;
-  }
-  else if(weight <= 2)
-  {
-    return 0.65;
-  }
-  else if(weight <= 3)
-  {
-    return 0.80;
-  }
-  else if(weight <= 3.5)
-  {
-    return 0.95;
-  }
-  else
-  {
-    return 0;
-  }  
-}
-
-function calculateLETotal(weight)
-{
-  if(weight <= 13)
-  {
-    return 1.00 + (weight - 1 < 0 ? 0 : Math.floor(weight - 1)) * 0.20
-  }
-  else
-  {
-    return 0;
-  }
-}
-
-function calcFCPTotal(weight, zone)
-{
-  if(weight <= 4.0)
-  {
-    return (zone < 3 ? 3.80 : (zone == 3 ? 3.85 : (zone == 4 ? 3.90 : (zone == 5 ? 3.95 : (zone == 6 ? 4.00 : (zone == 7 ? 4.05 : 4.20))))));
-  }
-  else if(weight <= 8.0)
-  {
-    return (zone < 3 ? 4.60 : (zone == 3 ? 4.65 : (zone == 4 ? 4.70 : (zone == 5 ? 4.75 : (zone == 6 ? 4.80 : (zone == 7 ? 4.90 : 5.00))))));
-  }
-  else if(weight <= 12.0)
-  {
-    return (zone < 3 ? 5.30 : (zone == 3 ? 5.35 : (zone == 4 ? 5.40 : (zone == 5 ? 5.45 : (zone == 6 ? 5.50 : (zone == 7 ? 5.65 : 5.75))))));
-  }
-  else if(weight <= 13.0)
-  {
-    return (zone < 3 ? 5.90 : (zone == 3 ? 5.95 : (zone == 4 ? 6.05 : (zone == 5 ? 6.15 : (zone == 6 ? 6.20 : (zone == 7 ? 6.40 : 6.50))))));
-  }
-  
-}

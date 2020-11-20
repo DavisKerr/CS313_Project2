@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <% include ../partials/head.ejs %>
+<body>
+  <% include ../partials/nav.ejs %>
+  <header>
+    <h1>Family Game Night</h1>
+  </header>
+  <div class="body-container">
+    <div class="block-half" id="cover-image">
+      <h5>Connect with family anywhere!</h5>
+      <h5>Play Games Together!</h5>
+      <h5>A Social Platform for the Whole Family!</h5>
+    </div>
+    <div class="block-half landing">
+      <% if(login){ %>
+        <% include ../partials/loginForm.ejs %>
+      <% } else{ %>
+        <% include ../partials/registerForm.ejs %>
+      <% } %>
+    </div>
+  </div>
+  
+</body>
+</html>
