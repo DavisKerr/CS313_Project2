@@ -18,12 +18,12 @@ exports.queryAccounts = function(pool, username, password, res, sess)
           sess.lname = result.rows[0].last_name;
           sess.date_created = result.rows[0].date_created;
           sess.profilePicture = result.rows[0].profile_picture;
-          res.redirect('/familyGameNight/home');
+          res.send({success : true});
         }
         else
         {
           sess.loggedIn = false;
-          res.redirect('/familyGameNight/login?error=Invalid username or password');
+          res.send({success : false});
         }
       });
       

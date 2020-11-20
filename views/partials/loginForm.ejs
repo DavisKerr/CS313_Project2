@@ -1,6 +1,6 @@
 <div class="authBox">
   <h3>Log in:</h3>
-  <%= error %>
+  <span id="formErr"></span>
   <form class="authForm" method="POST" action="processLogin" onsubmit="return validateLogin()">
     <label for="username">Username:</label>
     <input type="text" name="username" id="username">

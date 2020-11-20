@@ -77,20 +77,6 @@ CREATE TABLE public.user_stat
 , CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES public.user (id)
 );
 
-INSERT INTO public.user
-( first_name
-, last_name
-, username
-, password
-, date_created
-)
-VALUES
-('Myname'
-, 'WhatzitToya'
-, 'u'
-, '$2b$10$RhxbVwtt07UfCADc4TQAOuQ1PXh0zsA1/bq3QJuUlX71SynGpfURK'
-, (SELECT CURRENT_TIMESTAMP)
-);
 
 
 

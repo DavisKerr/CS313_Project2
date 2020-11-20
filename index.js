@@ -17,13 +17,16 @@ const { sanitizeBody } = require('express-validator');
 var queryAccounts = require('./Data/account/queryAccount');
 var createAccount = require('./Data/account/createAccount');
 
+/* Session utilities */
+var getAuth = require('./Util/Sessions/getAuth');
+
 /* Constant Variables */
 const PORT = process.env.PORT || 5000;
 const connectionString = process.env.DATABASE_URL;
 const saltRounds = 10;
 
 const pool = new Pool({connectionString : connectionString});
-//process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
+process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
 
 var app = express();
 
@@ -43,27 +46,18 @@ app.use(session({secret: 'shhhhhh', saveUninitialized : true, resave: true}));
 
 app.listen(PORT);
 
-//bcrypt.genSalt(saltRounds, function(err, salt) {
-//  bcrypt.hash('password', salt, function(err, hash) {
-//      console.log(hash);
-//  });
-//});
 
 /* Project 2*/ 
 
 app.get("/familyGameNight/login", (req, res) => {
-  var sess = req.session;
-  console.log(sess.loggedIn);
-  if(sess.loggedIn)
+  if(getAuth.isLoggedIn(req))
   {
     res.redirect('/familyGameNight/home');
   }
   else
   {
-    sess.loggedIn = false;
     res.render('pages/auth', {login:true, page:'auth', error: (req.query.error != undefined ? req.query.error : '')});
   }
-  
 });
 
 app.post("/familyGameNight/processLogin",[body('username').trim().escape().blacklist(';&%\\()\{\}!@#\$\^'), body('password').trim().escape().blacklist(';%&\\()\{\}!@#\$\^')] ,(req, res) => {
@@ -75,8 +69,7 @@ app.post("/familyGameNight/processLogin",[body('username').trim().escape().black
 });
 
 app.get("/familyGameNight/register", (req, res) => {
-  var sess = req.session;
-  if(sess.loggedIn)
+  if(getAuth.isLoggedIn(req))
   {
     res.redirect('/familyGameNight/home');
   }

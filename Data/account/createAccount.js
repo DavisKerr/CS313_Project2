@@ -10,7 +10,7 @@ exports.createAccount = function(pool, fname, lname, username, password, res, sa
     }
     else
     {
-      res.redirect('/familyGameNight/register?error=Error: Username is already in use');
+      res.send({success : false});
     }
   });
 
@@ -38,7 +38,7 @@ function insertAccount(pool, fname, lname, username, password, res, saltRounds)
       if (err) {
         throw err;
       }
-      res.redirect('/familyGameNight/login');
+      res.send({success : true});
     });
 });
   
