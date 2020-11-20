@@ -26,7 +26,11 @@ const connectionString = process.env.DATABASE_URL;
 const saltRounds = 10;
 
 const pool = new Pool({connectionString : connectionString});
-process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
+if(process.env.IS_LOCAL == 'true')
+{
+  process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
+}
+
 
 var app = express();
 
