@@ -11,8 +11,16 @@
     "test": "node test.js"
   },
   "dependencies": {
+    "bcrypt": "^5.0.0",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^8.2.0",
     "ejs": "^2.5.6",
-    "express": "^4.15.2"
+    "express": "^4.15.2",
+    "express-session": "^1.17.1",
+    "express-validator": "^6.6.1",
+    "password-hash": "^1.2.2",
+    "pg": "^8.5.1",
+    "sanitize": "^2.1.0"
   },
   "devDependencies": {
     "got": "^11.3.0",
