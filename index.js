@@ -60,6 +60,7 @@ app.get("/familyGameNight/login", (req, res) => {
   }
   else
   {
+    sess.loggedIn = false;
     res.render('pages/auth', {login:true, page:'auth', error: (req.query.error != undefined ? req.query.error : '')});
   }
   
@@ -74,6 +75,7 @@ app.post("/familyGameNight/processLogin",[body('username').trim().escape().black
 });
 
 app.get("/familyGameNight/register", (req, res) => {
+  var sess = req.session;
   if(sess.loggedIn)
   {
     res.redirect('/familyGameNight/home');

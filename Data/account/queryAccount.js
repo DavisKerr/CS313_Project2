@@ -22,6 +22,7 @@ exports.queryAccounts = function(pool, username, password, res, sess)
         }
         else
         {
+          sess.loggedIn = false;
           res.redirect('/familyGameNight/login?error=Invalid username or password');
         }
       });
@@ -29,6 +30,7 @@ exports.queryAccounts = function(pool, username, password, res, sess)
     }
     else
     {
+      sess.loggedIn = false;
       res.redirect('/familyGameNight/login?error=Invalid username or password');
     }
   });
