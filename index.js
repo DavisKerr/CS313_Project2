@@ -80,7 +80,11 @@ app.get("/familyGameNight/register", (req, res) => {
   {
     res.redirect('/familyGameNight/home');
   }
-  res.render('pages/auth', {login:false, page:'auth', error: (req.query.error != undefined ? req.query.error : '')});
+  else
+  {
+    res.render('pages/auth', {login:false, page:'auth', error: (req.query.error != undefined ? req.query.error : '')});
+  }
+  
 });
 
 app.get("/familyGameNight/home", (req, res) => {
