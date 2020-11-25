@@ -1,5 +1,5 @@
 /* Express and node Modules */
-const express = require('express')
+const express = require('express');
 const path = require('path')
 const URL = require('url');
 const bodyParser = require("body-parser");
@@ -91,7 +91,24 @@ app.get("/familyGameNight/home", (req, res) => {
   {
     res.redirect('/familyGameNight/login');
   }
-  res.end("<h1>Successful login. More content coming soon!</h1><br><a href='./logout'>Logout</a>");
+  else
+  {
+    res.render('pages/home', {login: false, page:'home'})
+  }
+  
+});
+
+app.get("/familyGameNight/chat", (req, res) => {
+  var sess = req.session;
+  if(!sess.loggedIn)
+  {
+    res.redirect('/familyGameNight/login');
+  }
+  else
+  {
+    res.render('pages/chat', {login: false, page:'chat'})
+  }
+  
 });
 
 app.post("/familyGameNight/processRegister", [
@@ -110,6 +127,7 @@ app.get("/familyGameNight/logout", (req, res) => {
   logout.logout(req);
   res.redirect('/familyGameNight/login');
 });
+
 
 
 /* Previous proves*/

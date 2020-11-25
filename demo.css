@@ -20,7 +20,6 @@ body
   flex-direction: row;
   width: 100%;
   border:1px solid purple;
-  align-items: flex-end;
 }
 
 .block-half
@@ -72,56 +71,6 @@ header
   height: 500px;
   border: 1px solid purple;
   background-color: #708090;
-}
-
-.chat
-{
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  width: 98%;
-  padding: 40px;
-  border: 1px solid purple;
-  background-color: #708090;
-}
-
-.item
-{
-  margin-left: 10px;
-  background-color: #FFFFFF;
-  width: 15%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 10px;
-  padding-bottom: 10px;
-}
-
-.post
-{
-  margin-left: 10px;
-  background-color: #FFFFFF;
-  width: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 10px;
-  padding-bottom: 10px;
-  margin-bottom: 20px;
-}
-
-.post img
-{
-  height: 400px;
-  width: 400px;
-}
-
-.item img
-{
-  height: 200px;
-  width: 200px;
 }
 
 @media only screen and (min-width: 600px) 
