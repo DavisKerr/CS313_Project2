@@ -6,7 +6,10 @@ const bodyParser = require("body-parser");
 const { body } = require('express-validator');
 const { Pool } = require('pg');
 const session = require('express-session');
+var router = express.Router();
+const bcrypt = require('bcryptjs');
 require('dotenv').config();
+
 
 /* Prove 09 Modules */
 var calculateRate = require('./prove09/calculateRate');
@@ -16,6 +19,10 @@ const { sanitizeBody } = require('express-validator');
 /* Project Modules */
 var queryAccounts = require('./Data/account/queryAccount');
 var createAccount = require('./Data/account/createAccount');
+var createFamily = require('./Data/family/createFamily');
+var joinFamily = require('./Data/family/joinFamily');
+var queryIsInFamily = require('./Data/family/queryIsInFamily');
+var queryFamily = require('./Data/family/queryFamily');
 
 /* Session utilities */
 var getAuth = require('./Util/Sessions/getAuth');
@@ -34,8 +41,7 @@ if(process.env.IS_LOCAL == 'true')
 
 
 var app = express();
-
-
+var server = require('http').createServer(app);
 
 //app.use(express.json());
 
@@ -47,9 +53,57 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+
 app.use(session({secret: 'shhhhhh', saveUninitialized : true, resave: true}));
 
-app.listen(PORT);
+
+
+SOCKET_LIST = {};
+var users = {};
+var io = require('socket.io')(server);
+io.sockets.on('connection', function(socket){
+
+
+  socket.on('newUser', function(data){
+    console.log('new user!');
+    var socketId = data.username;
+    socket.username = data.username;
+    socket.famId = data.famId;
+    console.log(socket.username + " joined the chat.")
+    users[socket.username] = socket;
+  });
+       
+  socket.on('sendMsgToServer',function(data){
+    
+
+    
+    console.log('someone sent a message!');
+    for(var i in users)
+    {
+      
+      if(users[i].famId == socket.famId)
+      {
+        users[i].emit('addToChat', {username: socket.username, message: data});
+      }
+    }
+    
+  });
+ 
+  socket.on('disconnect',function(){
+    console.log(socket.username + " Disconnected.")
+    delete users[socket.username];
+ });
+ 
+});
+ 
+
+server.listen(PORT); // Used to be app.
+
+
+/* Socket.io code - Source: https://www.skysilk.com/blog/2018/create-real-time-chat-app-nodejs/*/
+
+
+
 
 
 /* Project 2*/ 
@@ -69,7 +123,7 @@ app.post("/familyGameNight/processLogin",[body('username').trim().escape().black
   var username = req.body.username;
   var password = req.body.password;
   var sess = req.session;
-  queryAccounts.queryAccounts(pool, username, password, res, sess );
+  queryAccounts.queryAccounts(pool, username, password, res, sess);
   
 });
 
@@ -93,7 +147,15 @@ app.get("/familyGameNight/home", (req, res) => {
   }
   else
   {
-    res.render('pages/home', {login: false, page:'home'})
+    
+    if(sess.isPartFam)
+    {
+      res.render('pages/home', {login: false, page:'home', isPartFam: true})
+    }
+    else
+    {
+      queryIsInFamily.queryIsInFamily(pool, res, sess);
+    }
   }
   
 });
@@ -106,7 +168,8 @@ app.get("/familyGameNight/chat", (req, res) => {
   }
   else
   {
-    res.render('pages/chat', {login: false, page:'chat'})
+    var idStr = sess.famId;
+    res.render('pages/chat', {login: false, page:'chat', famIdStr : idStr, username : (sess.fname + ' ' + sess.lname.charAt(0)) });
   }
   
 });
@@ -128,7 +191,46 @@ app.get("/familyGameNight/logout", (req, res) => {
   res.redirect('/familyGameNight/login');
 });
 
+app.post('/familyGameNight/processCreateFam', [
+  body('famName').trim().blacklist(';&%\\()\{\}!@#\$\^').escape(), 
+  body('famCode').trim().blacklist(';%&\\()\{\}!@#\$\^').escape()], (req, res) => {
+    var famName = req.body.famName;
+    var famCode = req.body.famCode;
+    var sess = req.session;
+    createFamily.createFamily(pool, famName, famCode, res, sess, joinFamily);
+});
 
+app.post('/familyGameNight/processJoinFam', [
+  body('famName').trim().blacklist(';&%\\()\{\}!@#\$\^').escape(), 
+  body('famCode').trim().blacklist(';%&\\()\{\}!@#\$\^').escape()], (req, res) => {
+    var famName = req.body.famName;
+    var famCode = req.body.famCode;
+    var sess = req.session;
+    joinFamily.joinFamily(pool, famName, famCode, res, sess);
+});
+
+app.post('/familyGameNight/processJoinFam', [
+  body('famName').trim().blacklist(';&%\\()\{\}!@#\$\^').escape(), 
+  body('famCode').trim().blacklist(';%&\\()\{\}!@#\$\^').escape()], (req, res) => {
+    var famName = req.body.famName;
+    var famCode = req.body.famCode;
+    var sess = req.session;
+    joinFamily.joinFamily(pool, famName, famCode, res, sess);
+});
+
+app.get('/familyGameNight/family', (req, res) =>
+{
+  var sess = req.session;
+  if(!sess.loggedIn)
+  {
+    res.redirect('/familyGameNight/login');
+  }
+  else
+  {
+    queryFamily.queryFamily(pool, sess, res);
+  }
+  
+});
 
 /* Previous proves*/
 app.get("/", (req, res) => {
@@ -154,3 +256,75 @@ app.post("/calculatePostage", (req, res) => {
     res.render('pages/result', result);
   }
 });
+
+/* Week 12 Team Activity */
+/*
+var logRequest = function (req, res, next) {
+  console.log("Received a request for: " + req.url);
+  next();
+}
+
+var verifyLogin = function(req, res, next){
+  var sess = req.session;
+  if(sess.username)
+  {
+    next();
+  }
+  else
+  {
+    res.status(401);
+    res.json({success : false});
+  }
+}
+
+app.use(logRequest);
+
+
+app.post('/TA12/logout', (req, res) => {
+  var sess = req.session;
+  if(sess.username)
+  {
+    sess.destroy();
+    res.json({success : true});
+  }
+  else
+  {
+    res.json({success : false});
+  }
+});
+
+app.post('/TA12/login', [
+  body('username').trim().blacklist(';&%\\()\{\}!@#\$\^').escape(), 
+  body('password').trim().blacklist(';%&\\()\{\}!@#\$\^').escape()], (req, res) => {
+    var username = req.body.username;
+    var password = req.body.password;
+    var sess = req.session;
+
+    pool.query('SELECT * FROM accounts WHERE username = $1', [username], (req, result) => {
+      if(result.rows[0])
+      {
+        bcrypt.compare(password, result.rows[0].password.trim(), (err, match) => {
+          if(match)
+          {
+            sess.username = username;
+            res.json({success: true});
+          }
+          else
+          {
+            res.json({success : false});
+          }
+        });
+      }
+    }); 
+});
+
+app.get('/TA12/getServerTime', verifyLogin, (req, res) => {
+  var time = new Date()
+  res.json({success : true, time : time}); 
+});
+
+app.get('/TA12', (req, res) => {
+  res.render('pages/test');
+});*/
+
+

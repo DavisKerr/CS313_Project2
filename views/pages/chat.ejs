@@ -10,31 +10,29 @@
     <br>
     <div class="body-container-col">
 
-      <div class="chat">
+      <div id="chat">
+        <% /*messages.foreach(message => {*/ %> 
+          <!--<div class="post">
+            <div class="text">
+              <strong>From: <%= /*message.sent_by_name*/ %></strong>
+              <%= /*message.body*/ %>
+            </div>
+
+            <img src="/Images/eights.jpg">
+
+          </div>-->
+        <% /*});*/ %>
         
-        <div class="post">
-          
-          <div class="text">
-            <strong>From:</strong> Username<br>
-            <p>This is my post!</p>
-          </div>
-          
-          <img src="/Images/eights.jpg">
-
-        </div>
-        <div class="post">
-          <div class="text">
-            <strong>From:</strong> Username<br>
-            <p>This is my post!</p>
-          </div>
-        </div>
-
-        <form>
-          <textarea>
-            Add text here!
+      </div>
+        <form id="chat-form">
+          <h4> Your message here:</h4>
+          <textarea id="chat-input">
+            
           </textarea><br>
-          <button>Attach Image</button><br>
-          <button>Send</button><br>
+          <input hidden value=<%= famIdStr %> id='famId'>
+          <input hidden value=<%= username %> id='username'>
+          <!--<button>Attach Image</button><br>-->
+          <button type="submit">Send</button><br>
         </form>
 
       </div>

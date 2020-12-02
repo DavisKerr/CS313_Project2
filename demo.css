@@ -19,7 +19,9 @@ body
   left: 0;
   flex-direction: row;
   width: 100%;
-  border:1px solid purple;
+  padding: 10px;
+  margin: 5px;
+  border: 1px solid purple;
 }
 
 .block-half

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <% include ../partials/head.ejs %>
+<body>
+  <% include ../partials/nav.ejs %>
+  <header>
+    <h1>Family Game Night - Your Family</h1>
+  </header>
+    <br>
+    <br>
+    
+    <div class="body-container-general">
+    <h3> <%= members[0].family_name %></h3>
+    <span>Join code: <%= members[0].family_code %></span>
+      <% members.forEach(member => { %>
+        <div class="member">
+          <% if(member.id == member.owner_id) { %>
+            <strong>Owner:</strong><br>
+          <% } %>
+          <strong>Name: </strong> <%= member.first_name %> <%= member.last_name %> <br>
+          <strong>Joined on: </strong> <%= member.date_joined %><br>
+        </div>
+        <br>
+      <% }); %>
+    </div>
+    
+  </body>
+  </html>

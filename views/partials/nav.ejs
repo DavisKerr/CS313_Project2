@@ -32,10 +32,10 @@
         <a class="nav-link" href="./chat">Chat</a>
       </li>
       <li class="nav-item"></li>
-        <a class="nav-link" href="./Account">Account</a>
+        <a class="nav-link" href="./account">Account</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="./Family">Family</a>
+        <a class="nav-link" href="./family">Family</a>
       </li>
       
     <% } %>
@@ -46,10 +46,23 @@
         <a class="nav-link" href="./chat">Chat</a>
       </li>
       <li class="nav-item"></li>
-        <a class="nav-link" href="./Account">Account</a>
+        <a class="nav-link" href="./account">Account</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="./Family">Family</a>
+        <a class="nav-link" href="./family">Family</a>
+      </li>
+      
+    <% } %>
+    <% if(page == 'family'){ %>
+        
+      <li class="nav-item">
+        <a class="nav-link" href="./chat">Chat</a>
+      </li>
+      <li class="nav-item"></li>
+        <a class="nav-link" href="./account">Account</a>
+      </li>
+      <li class="nav-item active">
+        <a class="nav-link" href="./family">Family</a>
       </li>
       
     <% } %>

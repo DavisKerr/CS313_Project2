@@ -30,7 +30,10 @@ CREATE TABLE public.family
 ( id SERIAL PRIMARY KEY
 , owner_id INT NOT NULL
 , date_created TIMESTAMP NOT NULL
-, family_name CHAR(80) NOT NULL
+, family_name CHAR(80) NOT NULL UNIQUE
+, family_code CHAR(80) NOT NULL
+, join_link char(256)
+, link_exp TIMESTAMP
 , CONSTRAINT fk_owner_id FOREIGN KEY(owner_id) REFERENCES public.user (id)
 );
 
@@ -38,6 +41,7 @@ CREATE TABLE public.family_relationship
 ( id SERIAL PRIMARY KEY
 , user_id INT NOT NULL
 , family_id INT NOT NULL
+, date_joined TIMESTAMP NOT NULL
 , CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES public.user (id)
 , CONSTRAINT fk_family_id FOREIGN KEY (family_id) REFERENCES public.family (id)
 );
@@ -77,7 +81,13 @@ CREATE TABLE public.user_stat
 , CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES public.user (id)
 );
 
-
+SELECT f.family_name, f.family_code, u.first_name, u.last_name, u.username, fr.date_joined, f.date_created, f.owner_id
+FROM public.family_relationship fr
+JOIN public.family f 
+ON fr.family_id = f.id
+JOIN public.user u
+ON fr.user_id = u.id
+WHERE fr.family_id = 1;
 
 
 

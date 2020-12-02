@@ -3,6 +3,7 @@ const session = require('express-session')
 
 exports.queryAccounts = function(pool, username, password, res, sess)
 {
+  // Edit the query to process looking if the user is part of a family.
   pool.query('SELECT * FROM public.user WHERE username = $1', [username], (err, result) => {
     if (err) {
       throw err
@@ -12,7 +13,9 @@ exports.queryAccounts = function(pool, username, password, res, sess)
       bcrypt.compare(password, result.rows[0].password, (err, match) => {
         if(match)
         {
+          
           sess.loggedIn = true;
+          sess.uid = result.rows[0].id;
           sess.username = username;
           sess.fname = result.rows[0].first_name;
           sess.lname = result.rows[0].last_name;
