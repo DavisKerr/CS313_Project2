@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <% include ../partials/head.ejs %>
+<body>
+  <% include ../partials/nav.ejs %>
+  <header>
+    <h1>Family Game Night - Tic-Tac_toe</h1>
+  </header>
+    <br>
+    <br>
+    <div class="body-container-col">
+
+      <div id="chat">
+        <% /*messages.foreach(message => {*/ %> 
+          <!--<div class="post">
+            <div class="text">
+              <strong>From: <%= /*message.sent_by_name*/ %></strong>
+              <%= /*message.body*/ %>
+            </div>
+
+            <img src="/Images/eights.jpg">
+
+          </div>-->
+        <% /*});*/ %>
+        
+      </div>
+        <form id="chat-form">
+          <h4> Your message here:</h4>
+          <textarea id="chat-input">
+            
+          </textarea><br>
+          <input hidden value=<%= famIdStr %> id='famId'>
+          <input hidden value=<%= username %> id='username'>
+          <!--<button>Attach Image</button><br>-->
+          <button type="submit">Send</button><br>
+        </form>
+
+      </div>
+
+        
+
+    </div>
+
+    
+  </body>
+  </html>
