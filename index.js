@@ -23,10 +23,13 @@ var createFamily = require('./Data/family/createFamily');
 var joinFamily = require('./Data/family/joinFamily');
 var queryIsInFamily = require('./Data/family/queryIsInFamily');
 var queryFamily = require('./Data/family/queryFamily');
+var Game8s = require("./Util/gameLogic/Game8s");
 
 /* Session utilities */
 var getAuth = require('./Util/Sessions/getAuth');
 var logout = require('./Util/Sessions/logout');
+const { emit } = require('process');
+const { DH_UNABLE_TO_CHECK_GENERATOR } = require('constants');
 
 /* Constant Variables */
 const PORT = process.env.PORT || 5000;
@@ -60,23 +63,98 @@ app.use(session({secret: 'shhhhhh', saveUninitialized : true, resave: true}));
 
 SOCKET_LIST = {};
 var users = {};
+var games_for_8s = {};
 var io = require('socket.io')(server);
 io.sockets.on('connection', function(socket){
 
-
   socket.on('newUser', function(data){
-    console.log('new user!');
     var socketId = data.username;
     socket.username = data.username;
     socket.famId = data.famId;
-    console.log(socket.username + " joined the chat.")
+    socket.type = data.socketType;
+    if(socket.type == "Chat")
+    {
+      console.log(socket.username + " joined the chat.")
+      
+    }
+    else
+    {
+      console.log(socket.username + " joined the game.");
+      if(games_for_8s[data.famId])
+      {
+        console.log("Exists");
+        games_for_8s[data.famId].addPlayer(data.username);
+        socket.game = games_for_8s[data.famId];
+      }
+      else
+      {
+        console.log("Doesn't");
+        games_for_8s[data.famId] = new Game8s.Game8s(data.famId, data.username);
+        socket.game = games_for_8s[data.famId];
+      }
+      
+    }
     users[socket.username] = socket;
+    console.log(users[socket.username].type);
+  });
+
+  socket.on("startGame", function(data){
+    console.log("Started");
+    for(var i in users)
+    {
+      if(users[i].type = "CrazyEights")
+      {
+        var players = games_for_8s[users[i].famId].startGame();
+        for(var player in players)
+        {
+          users[players[player].username].emit("dealCards", {deal : games_for_8s[users[i].famId].convertToHTML(players[player].deck)});
+          users[players[player].username].emit("topCard", {topCard : games_for_8s[users[i].famId].getTop()});
+        }
+        break;
+      }
+    }
+    emitLengths(users[data.username].game.getPlayers(), users[data.username].famId, users[data.username].game.getTurn());
+  });
+
+  socket.on("drawOne", function(data){
+    users[data.username].emit('dealCards', {deal : users[socket.username].game.deal(data.username)});
+    emitLengths(users[data.username].game.getPlayers(), users[data.username].famId, users[data.username].game.getTurn());
+  });
+
+  socket.on("playCard", function(data){
+    games_for_8s[data.famId].playCard(data.username, data.card);
+    players = games_for_8s[data.famId].getPlayers();
+    for(var player in players)
+    {
+      users[players[player].username].emit("dealCards", {deal : games_for_8s[data.famId].convertToHTML(players[player].deck)});
+      users[players[player].username].emit("topCard", {topCard : games_for_8s[data.famId].getTop()});
+      if(games_for_8s[data.famId].checkEnd())
+      {
+        users[players[player].username].emit("gameOver", {winner : games_for_8s[data.famId].winner});
+      }
+    }
+    emitLengths(users[data.username].game.getPlayers(), users[data.username].famId, users[data.username].game.getTurn());
+  });
+
+  socket.on("playWild", function(data){
+    console.log(data.wild);
+    games_for_8s[data.famId].playWildCard(data.username, data.card, data.wild);
+    players = games_for_8s[data.famId].getPlayers();
+    for(var player in players)
+    {
+      users[players[player].username].emit("dealCards", {deal : games_for_8s[data.famId].convertToHTML(players[player].deck)});
+      users[players[player].username].emit("topCard", {topCard : games_for_8s[data.famId].getTop()});
+      if(games_for_8s[data.famId].checkEnd())
+      {
+        users[players[player].username].emit("gameOver", {winner : games_for_8s[data.famId].winner});
+      }
+    }
+    emitLengths(users[data.username].game.getPlayers(), users[data.username].famId, users[data.username].game.getTurn());
+    
   });
        
   socket.on('sendMsgToServer',function(data){
-    
 
-    
     console.log('someone sent a message!');
     for(var i in users)
     {
@@ -88,14 +166,53 @@ io.sockets.on('connection', function(socket){
     }
     
   });
- 
+
   socket.on('disconnect',function(){
-    console.log(socket.username + " Disconnected.")
+    console.log(socket.username + " Disconnected.");
+    if(socket.username && users[socket.username].type == "CrazyEights")
+    {
+      console.log("removing " + socket.username)
+      if(users[socket.username].game.removePlayer(socket.username) == 0)
+      {
+        newGames = {};
+        for(var game in games_for_8s)
+        {
+          if(game.famId != users[socket.username].famId)
+          {
+            newGames[game.famId] = game;
+          }
+        }
+        games_for_8s = newGames;
+        if(games_for_8s[users[socket.username]])
+        {
+          console.log("Delete failed.");
+        } 
+      }
+    }
     delete users[socket.username];
  });
  
 });
- 
+
+
+function emitLengths(players, famId, turn)
+{
+  playerList = {}
+  for(var i in players)
+  {
+    playerList[players[i].username] = players[i].numCards;
+  }
+
+  for(var j in users)
+  {
+    if(users[j].game && users[j].game.famId == famId)
+    {
+      users[j].emit("players", {players : playerList, turn : turn});
+    }
+  }
+
+  return playerList;
+}
 
 server.listen(PORT); // Used to be app.
 
@@ -169,7 +286,8 @@ app.get("/familyGameNight/chat", (req, res) => {
   else
   {
     var idStr = sess.famId;
-    res.render('pages/chat', {login: false, page:'chat', famIdStr : idStr, username : (sess.fname + ' ' + sess.lname.charAt(0)) });
+    res.render('pages/chat', {login: false, page:'chat', famIdStr : idStr, 
+    username : (sess.fname + ' ' + sess.lname.charAt(0)), socketType : "Chat"});
   }
   
 });
@@ -230,6 +348,20 @@ app.get('/familyGameNight/family', (req, res) =>
     queryFamily.queryFamily(pool, sess, res);
   }
   
+});
+
+app.get('/familyGameNight/crazyEights', (req, res) =>
+{
+  var sess = req.session;
+  if(!sess.loggedIn)
+  {
+    res.redirect('/familyGameNight/login');
+  }
+  else
+  {
+    res.render('pages/crazyEights', {login: false, page:'game', famIdStr : sess.famId, 
+    username : (sess.fname + ' ' + sess.lname.charAt(0)), socketType : "CrazyEights"});
+  }
 });
 
 /* Previous proves*/

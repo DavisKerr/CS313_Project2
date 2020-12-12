@@ -5,12 +5,13 @@ $(document).ready(function(){
   var chatForm = document.getElementById('chat-form');
   var famId = document.getElementById('famId').value;
   var username = document.getElementById('username').value;
+  var socketType = document.getElementById('socketType').value;
   
   
   var socket = io();
   var typing = false;
 
-  socket.emit('newUser', {username : username, famId : famId});
+  socket.emit('newUser', {username : username, famId : famId, socketType : socketType});
 
   document.getElementById('chat-input').addEventListener('focus', function() {
     typing = true;

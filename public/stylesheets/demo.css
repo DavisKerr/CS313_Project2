@@ -21,6 +21,7 @@ body
   width: 100%;
   border:1px solid purple;
   align-items: center;
+  height: 70vh;
 }
 
 .body-container-general
@@ -80,7 +81,7 @@ header
   flex-direction: column;
   justify-content: space-evenly;
   width: 98%;
-  height: 500px;
+  height: 100%;
   border: 1px solid purple;
   background-color: #708090;
   z-index: 1;
@@ -167,6 +168,77 @@ header
   width: 20%;
   z-index: 3;
   padding: 10px;
+}
+
+#gameBoard
+{
+  display: flex;
+  flex-direction: column;
+  background-color: purple;
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+#topBoard
+{
+  position: relative;
+  height: 35%;
+  width: 100%;
+  margin-bottom: 2px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+#midBoard
+{
+  position: relative;
+  height: 30%;
+  width: 100%;
+  margin-bottom: 2px;
+  display: flex;
+  justify-content: space-evenly;
+}
+
+#bottomBoard
+{
+  position: relative;
+  height: 35%;
+  width: 100%;
+  margin-bottom: 2px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+#lPlayer
+{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+}
+
+#rPlayer
+{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+}
+
+#deck
+{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+
+.card
+{
+  height: 90px;
+  width: 65px;
+  margin: 2px;
 }
 
 @media only screen and (min-width: 600px) 

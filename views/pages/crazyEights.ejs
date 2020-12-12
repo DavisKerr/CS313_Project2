@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <% include ../partials/head.ejs %>
+<body>
+  <% include ../partials/nav.ejs %>
+  <header>
+    <h1>Crazy Eights</h1>
+  </header>
+    <br>
+    <br>
+    <h3>Game:</h3>
+    <button id="startButton" onclick="startGame()">Start Game</button>
+    <div class="body-container-col">
+      <div class="block-center">
+
+        <div id="gameBoard">
+
+          <div id="topBoard">
+            <div id="topPlayer">
+              <h4 id="topPlayerTag">Username player 2 - 1 card</h4>
+              <img src="/Images/cards/back.png" class="card" id="topPlayerCard">
+            </div>
+          </div>
+          <div id="midBoard">
+            <div id="lPlayer">
+              <h4 id="lPlayerTag">Username player 1 - 2 cards</h4>
+              <img src="/Images/cards/back.png" class="card" id="lPlayerCard">
+            </div>
+
+            <div id="deck">
+              <img src="/Images/cards/back.png" class="card" value="B1" onclick="drawCard()">
+              <div id="placePile">
+                <img src="/Images/cards/back.png" class="card" value="None" id="placeCard">
+              </div>
+            </div>
+            <div id="rPlayer">
+              <h4 id="rPlayerTag">Username player 3 - 6 cards</h4>
+              <img src="/Images/cards/back.png" class="card" id="rPlayerCard">
+            </div>
+          </div>
+          <div id="bottomBoard">
+            
+          </div>
+          <div id="wildForm">
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <input hidden value=<%= famIdStr %> id='famId'>
+    <input hidden value=<%= username %> id='username'>
+    <input hidden value=<%= socketType %> id='socketType'>
+  </body>
+  </html>
